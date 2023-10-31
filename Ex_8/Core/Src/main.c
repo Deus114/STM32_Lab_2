@@ -60,6 +60,11 @@ void updateClockBuffer(void);
 /* USER CODE BEGIN 0 */
 int hour = 15, minute = 8, second = 50;
 
+const int MAX_LED = 4;
+int index_led = 0;
+int led_buffer[4] = {1, 3, 5, 7};
+int counter = 100;
+
 int timer0_counter = 0;
 int timer0_flag = 0;
 int TIMER_CYCLE = 10;
@@ -69,12 +74,27 @@ void setTimer0(int duration){
 	timer0_flag = 0;
 }
 
+int timer1_counter = 0;
+int timer1_flag = 0;
+
+void setTimer1(int duration) {
+	timer1_counter = duration / TIMER_CYCLE;
+	timer1_flag = 0;
+}
+
 void timer_run(){
 	if(timer0_counter > 0){
 		timer0_counter--;
-		if(timer0_counter == 0) timer0_flag = 1;
+		if(timer0_counter == 0)
+			timer0_flag = 1;
+	}
+	if(timer1_counter > 0){
+		timer1_counter--;
+		if(timer1_counter == 0)
+			timer1_flag = 1;
 	}
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -109,6 +129,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
   setTimer0(TIMER_CYCLE);
+  setTimer1(TIMER_CYCLE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,24 +137,28 @@ int main(void)
   while (1)
   {
 	  if(timer0_flag == 1){
-		  second++;
-		  if(second >= 60) {
-			  minute+=1;
-			  second = 0;
-		  }
-		  if(minute >= 60) {
-			  hour+=1;
-	  		  minute = 0;
-		  }
-		  if(hour >= 24) {
-	  		  hour = 0;
-		  }
-		  updateClockBuffer();
-		  HAL_GPIO_TogglePin(GPIOA, DOT_Pin);
-		  setTimer0(1000);
+	  		  second++;
+	  		  if(second >= 60) {
+	  			  minute+=1;
+	  			  second = 0;
+	  		  }
+	  		  if(minute >= 60) {
+	  			  hour+=1;
+	  	  		  minute = 0;
+	  		  }
+	  		  if(hour >= 24) {
+	  	  		  hour = 0;
+	  		  }
+	  		  updateClockBuffer();
+	  		  HAL_GPIO_TogglePin(GPIOA, DOT_Pin);
+	  		  setTimer0(1000);
+	  }
+	  if(timer1_flag == 1) {
+	  		update7SEG(index_led);
+	  		index_led = (index_led + 1) % 4;
+	  		setTimer1(1000);
 	  }
   }
-  /* USER CODE END 3 */
 }
 
 /**
@@ -258,20 +283,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-const int MAX_LED = 4;
-int index_led = 0;
-int led_buffer[4] = {1, 3, 5, 7};
-int counter = 100;
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	timer_run();
-
-	if(counter <= 0) {
-		counter = 100;
-		update7SEG(index_led);
-		index_led = (index_led+1) % 4;
-	}
-	--counter;
 }
 
 void display7SEG(int num) {
