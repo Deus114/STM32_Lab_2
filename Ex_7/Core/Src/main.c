@@ -116,22 +116,22 @@ int main(void)
   while (1)
   {
 	  if(timer0_flag == 1){
-	  		second++;
-	  		if(second >= 60) {
-	  		  minute+=1;
-	  		  second = 0;
-	  		}
-	  		if(minute >= 60) {
-	  		  hour+=1;
+		  second++;
+		  if(second >= 60) {
+			  minute+=1;
+			  second = 0;
+		  }
+		  if(minute >= 60) {
+			  hour+=1;
 	  		  minute = 0;
-	  		}
-	  		if(hour >= 24) {
+		  }
+		  if(hour >= 24) {
 	  		  hour = 0;
-	  		}
-	  		updateClockBuffer();
-	  		HAL_GPIO_TogglePin(GPIOA, DOT_Pin);
-	  		setTimer0(1000);
-	  	}
+		  }
+		  updateClockBuffer();
+		  HAL_GPIO_TogglePin(GPIOA, DOT_Pin);
+		  setTimer0(1000);
+	  }
   }
   /* USER CODE END 3 */
 }
